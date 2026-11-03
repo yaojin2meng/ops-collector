@@ -1,0 +1,22 @@
+# 运行产物（含真实站点数据，禁止提交）
+var/
+
+# 真实配置（含站点地址与账号引用）
+config/collector.json
+
+# 临时/本地 smoke 配置
+*.tmp.json
+smoke-*.json
+
+
+# Go 构建产物
+go/ops-collector.exe
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+.venv/

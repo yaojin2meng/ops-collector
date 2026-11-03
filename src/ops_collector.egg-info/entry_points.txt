@@ -1,0 +1,2 @@
+[console_scripts]
+ops-collector = ops_collector.cli:main

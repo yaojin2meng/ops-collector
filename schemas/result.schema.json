@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ops-collector/result-v1.json",
+  "title": "ops-collector 采集 artifact（site-*.json）",
+  "type": "object",
+  "required": ["schema_version", "run_id", "site_id", "site_kind", "collected_at", "call_logs", "group_ratios", "performance", "model_prices"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "run_id": {"type": "string"},
+    "site_id": {"type": "string", "description": "站点标识（非网址）"},
+    "site_kind": {"enum": ["new_api", "sub2api"]},
+    "collected_at": {"type": "integer", "description": "unix 秒"},
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "native_success_rate": {"type": "boolean"},
+        "native_ttft": {"type": "boolean"},
+        "native_tps": {"type": "boolean"},
+        "native_model_price": {"type": "boolean"},
+        "preset_ratio_sync": {"type": "boolean"}
+      }
+    },
+    "call_logs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["site_id", "record_id", "observed_at"],
+        "properties": {
+          "record_id": {"type": "string"},
+          "observed_at": {"type": "integer"},
+          "model": {"type": ["string", "null"]},
+          "group": {"type": ["string", "null"]},
+          "status": {"enum": ["success", "error", "unknown"]},
+          "input_tokens": {"type": ["integer", "null"]},
+          "output_tokens": {"type": ["integer", "null"]},
+          "quota_cost": {"type": ["number", "null"]},
+          "duration_ms": {"type": ["integer", "null"]},
+          "first_token_ms": {"type": ["integer", "null"]},
+          "raw": {"type": "object"}
+        }
+      }
+    },
+    "call_logs_truncated": {
+      "type": "boolean",
+      "description": "true = 调用日志因分页上限截断，数据不完整且断点未推进"
+    },
+    "call_logs_note": {"type": "string"},
+    "group_ratios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["group", "ratio", "scope"],
+        "properties": {
+          "group": {"type": "string", "description": "join 键：new-api=分组名；sub2api=分组 gid 字符串（人类名在 extra.group_name）"},
+          "ratio": {"type": "number"},
+          "scope": {"enum": ["site", "model"]},
+          "model_name": {"type": ["string", "null"]},
+          "description": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "performance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["model", "window_hours", "success_rate", "avg_ttft_ms", "avg_output_tps"],
+        "properties": {
+          "model": {"type": "string"},
+          "group": {"type": ["string", "null"]},
+          "window_hours": {"type": "integer"},
+          "request_count": {"type": ["integer", "null"]},
+          "success_rate": {"$ref": "#/$defs/metric"},
+          "avg_ttft_ms": {"$ref": "#/$defs/metric"},
+          "avg_output_tps": {"$ref": "#/$defs/metric"},
+          "avg_latency_ms": {"$ref": "#/$defs/metric"}
+        }
+      }
+    },
+    "model_prices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["model", "group", "billing_type", "provenance", "definition"],
+        "properties": {
+          "model": {"type": "string"},
+          "group": {"type": "string"},
+          "billing_type": {"enum": ["ratio", "per_call", "unknown"]},
+          "input_per_m_usd": {"type": ["number", "null"]},
+          "output_per_m_usd": {"type": ["number", "null"]},
+          "cache_read_per_m_usd": {"type": ["number", "null"]},
+          "cache_create_per_m_usd": {"type": ["number", "null"]},
+          "per_call_usd": {"type": ["number", "null"]},
+          "model_ratio": {"type": ["number", "null"]},
+          "completion_ratio": {"type": ["number", "null"]},
+          "cache_ratio": {"type": ["number", "null"]},
+          "group_ratio": {"type": "number"},
+          "provenance": {"enum": ["native", "derived", "unsupported", "missing"]},
+          "definition": {"type": "string"}
+        }
+      }
+    },
+    "preset_ratio_config": {
+      "type": "object",
+      "description": "new-api 官方预设倍率配置（/api/ratio_config 原样 + source/synced_at）；仅 new-api 站点存在",
+      "properties": {
+        "source": {"type": "string"},
+        "synced_at": {"type": "integer"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": ["value", "provenance"],
+      "properties": {
+        "value": {"type": ["number", "null"]},
+        "provenance": {"enum": ["native", "derived", "unsupported", "missing"]},
+        "definition": {"type": "string"}
+      }
+    }
+  }
+}

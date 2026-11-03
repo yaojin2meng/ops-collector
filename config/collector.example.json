@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "defaults": {
+    "windows_hours": [1, 24, 168],
+    "page_size": 100,
+    "max_pages_per_resource": 50,
+    "concurrency": 4,
+    "timeout_s": 20.0,
+    "retries": 3,
+    "min_interval_s": 0.4,
+    "backoff_base_s": 1.2
+  },
+  "sites": [
+    {
+      "site_id": "my-newapi",
+      "name": "示例 new-api 站点",
+      "kind": "new_api",
+      "base_url": "https://my-newapi.example.com",
+      "auth": {
+        "mode": "password",
+        "username": "运营账号用户名",
+        "secret_ref": "my-newapi:password"
+      },
+      "notes": "站点若开启 Turnstile 或 2FA，密码登录自动化会被阻断；请在站点『安全设置』创建访问令牌后改用 api_key 模式。admin:true 表示该账号是本站管理员，允许渠道管理（增删/启停/测试）",
+      "enabled": true,
+      "admin": false,
+      "verify_tls": true
+    },
+    {
+      "site_id": "my-sub2api",
+      "name": "示例 sub2api 站点",
+      "kind": "sub2api",
+      "base_url": "https://my-sub2api.example.com",
+      "auth": {
+        "mode": "password",
+        "email": "ops@example.com",
+        "secret_ref": "my-sub2api:password"
+      },
+      "enabled": true
+    },
+    {
+      "site_id": "my-newapi-pat",
+      "name": "示例：new-api 用访问令牌（推荐给开启人机校验的站点）",
+      "kind": "new_api",
+      "base_url": "https://my-newapi.example.com",
+      "auth": {
+        "mode": "api_key",
+        "api_key_secret_ref": "my-newapi:pat"
+      },
+      "enabled": false
+    }
+  ]
+}
