@@ -16,6 +16,24 @@
 
 所有指标带 `provenance`（native/derived/unsupported/missing）与口径说明。
 
+### 日志 ↔ 上游渠道自动对齐
+对自己的站，可把模型 ID 映射到指定上游渠道（多Key渠道可加 `key_label`
+泳道标签精确归属），采集时自动标注每条请求日志的上游归属：
+
+```json
+"log_alignment": [
+  { "models": ["gpt-4o", "gpt-4o-*"], "channel_id": 1, "key_label": "supplierA-main" },
+  { "models": ["claude-*"], "channel_id": 2 }
+]
+```
+
+- 对齐来源：`rule`（配置映射，优先）> `native`（new-api 日志自带渠道 id /
+  sub2api usage 的 account_id）
+- `admin: true` 时自动回查渠道名（`channel_name`）；未开启时只给 ID
+- `channel_id` 与 `channels list` 同键域（稳定 ID，非网址）；`key_label`
+  是自定义标签，**真实密钥写进配置会被直接拒绝**
+- 未对齐的日志如实留空，不猜测
+
 ## 构建与测试（Go ≥1.22，模块代理用 goproxy.cn）
 ```powershell
 cd go

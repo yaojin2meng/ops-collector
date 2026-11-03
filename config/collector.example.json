@@ -21,10 +21,20 @@
         "username": "运营账号用户名",
         "secret_ref": "my-newapi:password"
       },
-      "notes": "站点若开启 Turnstile 或 2FA，密码登录自动化会被阻断；请在站点『安全设置』创建访问令牌后改用 api_key 模式。admin:true 表示该账号是本站管理员，允许渠道管理（增删/启停/测试）",
+      "notes": "站点若开启 Turnstile 或 2FA，密码登录自动化会被阻断；请在站点『安全设置』创建访问令牌后改用 api_key 模式。admin:true 表示该账号是本站管理员，允许渠道管理（增删/启停/测试）与渠道名回查",
       "enabled": true,
       "admin": false,
-      "verify_tls": true
+      "log_alignment": [
+        {
+          "models": ["gpt-4o", "gpt-4o-*"],
+          "channel_id": 1,
+          "key_label": "supplierA-main"
+        },
+        {
+          "models": ["claude-*"],
+          "channel_id": 2
+        }
+      ]
     },
     {
       "site_id": "my-sub2api",

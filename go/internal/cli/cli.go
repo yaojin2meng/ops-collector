@@ -108,7 +108,7 @@ func usage() {
 // ---- init ----
 
 func exampleConfig() *config.Config {
-	verify, enabled := true, true
+	enabled := true
 	return &config.Config{
 		SchemaVersion: 1,
 		Sites: []*config.SiteConfig{
@@ -117,15 +117,15 @@ func exampleConfig() *config.Config {
 				BaseURL: "https://example-newapi.example.com",
 				Auth: config.AuthConfig{Mode: "password", Username: "your-username",
 					SecretRef: "my-newapi:password"},
-				Enabled: &enabled, VerifyTLS: &verify,
-				Notes: "若站点开启 Turnstile/2FA，请改用 api_key 模式（安全设置里的访问令牌）",
+				Enabled: &enabled,
+				Notes:   "若站点开启 Turnstile/2FA，请改用 api_key 模式（安全设置里的访问令牌）",
 			},
 			{
 				SiteID: "my-sub2api", Name: "我的 sub2api 站点", Kind: "sub2api",
 				BaseURL: "https://example-sub2api.example.com",
 				Auth: config.AuthConfig{Mode: "password", Email: "you@example.com",
 					SecretRef: "my-sub2api:password"},
-				Enabled: &enabled, VerifyTLS: &verify,
+				Enabled: &enabled,
 			},
 		},
 	}

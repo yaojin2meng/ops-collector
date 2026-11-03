@@ -30,7 +30,7 @@ func adminNapiSite(baseURL string, admin bool) *config.SiteConfig {
 		SiteID: "na1", Kind: "new_api", BaseURL: baseURL,
 		Auth: config.AuthConfig{Mode: "password", Username: "opuser",
 			SecretRef: "na1:password"},
-		Enabled: &verify, Admin: &a, VerifyTLS: &verify,
+		Enabled: &verify, Admin: &a,
 	}
 }
 
@@ -40,7 +40,7 @@ func adminSubSite(baseURL string, admin bool) *config.SiteConfig {
 		SiteID: "sb1", Kind: "sub2api", BaseURL: baseURL,
 		Auth: config.AuthConfig{Mode: "password", Email: "ops@example.com",
 			SecretRef: "sb1:password"},
-		Enabled: &verify, Admin: &a, VerifyTLS: &verify,
+		Enabled: &verify, Admin: &a,
 	}
 }
 

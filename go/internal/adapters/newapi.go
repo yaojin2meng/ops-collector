@@ -161,6 +161,12 @@ func (a *NewApiAdapter) toCallRecord(it map[string]any) records.CallRecord {
 	if v, ok := httpc.AsInt(it["created_at"]); ok {
 		observedAt = v
 	}
+	// 原生渠道归属：new-api 日志自带渠道 id（0=旧数据无归属）
+	var channelID *string
+	if ch, ok := httpc.AsInt(it["channel"]); ok && ch > 0 {
+		s := strconv.FormatInt(ch, 10)
+		channelID = &s
+	}
 	// type: 1=消费（成功调用）5=错误；调用记录只有这两种
 	logType, _ := httpc.AsInt(it["type"])
 	status := records.StatusUnknown
@@ -180,6 +186,7 @@ func (a *NewApiAdapter) toCallRecord(it map[string]any) records.CallRecord {
 			Group:         strPtr("group"),
 			Status:        status,
 			ErrorClass:    &ec,
+			ChannelID:     channelID,
 			Raw:           records.CleanRaw(it, logRawAllowlist),
 		}
 	}
@@ -203,6 +210,7 @@ func (a *NewApiAdapter) toCallRecord(it map[string]any) records.CallRecord {
 		DurationMs:    durationMs,
 		FirstTokenMs:  nil, // 日志逐条无 TTFT；用 perf-metrics 原生聚合
 		Stream:        boolPtr(it["is_stream"]),
+		ChannelID:     channelID,
 		Raw:           records.CleanRaw(it, logRawAllowlist),
 	}
 }

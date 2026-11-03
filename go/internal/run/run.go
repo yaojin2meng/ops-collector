@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"opscollector/internal/adapters"
+	"opscollector/internal/align"
+	"opscollector/internal/channels"
 	"opscollector/internal/checkpoint"
 	"opscollector/internal/config"
 	ierr "opscollector/internal/errors"
@@ -247,6 +249,26 @@ func collectSite(site *config.SiteConfig, cfg *config.Config, runID, outDir,
 				"note":  "超出 max_pages 上限，本轮不推进断点；请调大 max_pages_per_resource"})
 		}
 
+		// 1.5) 日志 ↔ 上游渠道对齐：admin 可用时回查渠道名，配置规则可覆盖
+		var namesByID map[int64]string
+		if site.AdminEnabled() {
+			if cmgr, cerr := channels.Make(site, client); cerr == nil {
+				if chs, _, lerr := cmgr.List(channels.ListOptions{PageSize: 500, MaxPages: 20}); lerr == nil {
+					namesByID = make(map[int64]string, len(chs))
+					for _, c := range chs {
+						namesByID[c.ChannelID] = c.Name
+					}
+				} else {
+					log.Warn("align.channels_fetch_failed", map[string]any{
+						"run_id": runID, "site_id": site.SiteID, "error": lerr.Error()})
+				}
+			}
+		}
+		logs, astats := align.Apply(logs, site.LogAlignment, namesByID)
+		log.Info("align.done", map[string]any{"run_id": runID,
+			"site_id": site.SiteID, "native": astats.Native,
+			"rule": astats.Rule, "unaligned": astats.Unaligned})
+
 		// 2) 分组倍率
 		ratios, err := adapter.FetchGroupRatios()
 		if err != nil {
@@ -328,6 +350,8 @@ func collectSite(site *config.SiteConfig, cfg *config.Config, runID, outDir,
 		result.Counts = map[string]int{
 			"call_logs": len(logs), "group_ratios": len(ratios),
 			"performance": len(perf), "model_prices": len(prices),
+			"aligned_native": astats.Native, "aligned_rule": astats.Rule,
+			"aligned_unaligned": astats.Unaligned,
 		}
 		if truncated {
 			result.Counts["call_logs_truncated"] = 1

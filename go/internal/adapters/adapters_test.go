@@ -28,7 +28,7 @@ func napiSite(baseURL string) *config.SiteConfig {
 		SiteID: "na1", Kind: "new_api", BaseURL: baseURL,
 		Auth: config.AuthConfig{Mode: "password", Username: "opuser",
 			SecretRef: "na1:password"},
-		Enabled: &verify, VerifyTLS: &verify,
+		Enabled: &verify,
 	}
 }
 
@@ -38,7 +38,7 @@ func subSite(baseURL string) *config.SiteConfig {
 		SiteID: "sb1", Kind: "sub2api", BaseURL: baseURL,
 		Auth: config.AuthConfig{Mode: "password", Email: "ops@example.com",
 			SecretRef: "sb1:password"},
-		Enabled: &verify, VerifyTLS: &verify,
+		Enabled: &verify,
 	}
 }
 

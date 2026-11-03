@@ -55,6 +55,16 @@ artifact 路径。`partial` 属正常（个别站点失败不影响其他），�
   - `unsupported` / `missing`：上游没有该数据或本次未取到——**不要当作 0**
 - 对比不同站点时注意口径差异：new-api 成功率是站点侧聚合口径，
   sub2api 是 usage/(usage+errors) 近似口径，不可直接混算。
+
+## 日志 ↔ 上游渠道对齐
+artifact 的 `call_logs[].channel_id/channel_name/channel_key_label/
+channel_source` 标注每条请求的上游归属：
+- `channel_source: rule` = 配置 `log_alignment` 映射（模型 ID → 渠道，
+  优先）；`native` = 站点日志自带（new-api 渠道 id / sub2api account_id）
+- 需要按上游供应商聚合成本/成功率时，按 `channel_id`（+`channel_key_label`）
+  分组即可；未对齐的记录这两个字段为 null，不要猜测归属
+- 规则配置见 README「日志 ↔ 上游渠道自动对齐」；渠道 id 用
+  `channels list`（admin）查询
 - 价格口径：new-api 价格=倍率×2×分组倍率（native，含缓存价）；
   sub2api 价格=近7天实付 sum(cost)/sum(tokens)×1M（derived，天然含倍率）。
   跨站比价时 new-api 看 `input_per_m_usd`，sub2api 看同列即可，但注意

@@ -42,11 +42,11 @@ func TestTruncatedLogsNoCheckpointAdvance(t *testing.T) {
 			{SiteID: "na1", Kind: "new_api", BaseURL: na.URL,
 				Auth: config.AuthConfig{Mode: "password", Username: "opuser",
 					SecretRef: "na1:password"},
-				Enabled: &verify, VerifyTLS: &verify},
+				Enabled: &verify},
 			{SiteID: "sb1", Kind: "sub2api", BaseURL: sb.URL,
 				Auth: config.AuthConfig{Mode: "password", Email: "ops@example.com",
 					SecretRef: "sb1:password"},
-				Enabled: &disabled, VerifyTLS: &verify},
+				Enabled: &disabled},
 		},
 	}
 

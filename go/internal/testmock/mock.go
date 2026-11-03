@@ -105,7 +105,7 @@ func napiLog(i int, over map[string]any) map[string]any {
 		"type": 1, "username": "opuser", "token_name": "agent-key",
 		"model_name": "gpt-4o-mini", "quota": 1234,
 		"prompt_tokens": 500 + i, "completion_tokens": 200 + i,
-		"use_time": 3, "is_stream": true, "channel": 7, "group": "default",
+		"use_time": 3, "is_stream": true, "channel": 1, "group": "default",
 	}
 	for k, v := range over {
 		m[k] = v
@@ -187,7 +187,7 @@ func NewApiSite() *httptest.Server {
 			all = append(all, napiLog(i, nil))
 		}
 		all = append(all, napiLog(90, map[string]any{
-			"model_name": "claude-sonnet-4", "group": "vip",
+			"model_name": "claude-sonnet-4", "group": "vip", "channel": 2,
 			"prompt_tokens": 900, "completion_tokens": 700, "use_time": 8}))
 		// 混入一条充值记录（type=2）：实现应过滤掉，不能混进调用记录
 		all = append(all, napiLog(95, map[string]any{

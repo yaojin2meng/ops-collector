@@ -37,11 +37,11 @@ func twoSiteConfig(naURL, sbURL string) *config.Config {
 			{SiteID: "na1", Kind: "new_api", BaseURL: naURL,
 				Auth: config.AuthConfig{Mode: "password", Username: "opuser",
 					SecretRef: "na1:password"},
-				Enabled: &verify, VerifyTLS: &verify},
+				Enabled: &verify},
 			{SiteID: "sb1", Kind: "sub2api", BaseURL: sbURL,
 				Auth: config.AuthConfig{Mode: "password", Email: "ops@example.com",
 					SecretRef: "sb1:password"},
-				Enabled: &verify, VerifyTLS: &verify},
+				Enabled: &verify},
 		},
 	}
 }

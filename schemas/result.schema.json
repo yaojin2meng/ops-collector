@@ -36,6 +36,10 @@
           "quota_cost": {"type": ["number", "null"]},
           "duration_ms": {"type": ["integer", "null"]},
           "first_token_ms": {"type": ["integer", "null"]},
+          "channel_id": {"type": ["string", "null"], "description": "上游渠道标识（new-api=渠道 id；sub2api=account_id），稳定 ID 非网址"},
+          "channel_name": {"type": ["string", "null"], "description": "admin 面回查的渠道名；查不到则为 null"},
+          "channel_key_label": {"type": ["string", "null"], "description": "多Key渠道的 key 泳道标签（运营者自定义，非密钥本身）"},
+          "channel_source": {"type": ["string", "null"], "enum": ["native", "rule", null], "description": "对齐来源：native=站点日志自带；rule=配置映射"},
           "raw": {"type": "object"}
         }
       }

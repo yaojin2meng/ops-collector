@@ -197,6 +197,19 @@ GitHub 直连在中国网络不可达，jsdelivr 实测可用）。
   有限重试，退避封顶 30s；Retry-After 仅采纳 [1,120] 秒。
 - 所有等待可被 Ctrl+C（ctx）打断。
 
+### 日志 ↔ 上游渠道自动对齐（collector 本地逻辑，2026-11-04 增补）
+- 目标：把每条请求日志归属到具体上游渠道（多Key渠道精确到 key 泳道）。
+- 原生来源：new-api `/api/log/self` 每条自带 `channel`（渠道 id）；
+  sub2api usage 每条自带 `account_id`（上游账号 id）。两者都以稳定 ID
+  写入 `CallRecord.ChannelID`（非网址）。
+- 配置规则：`sites[].log_alignment[] = {models[], channel_id, key_label?}`，
+  models 支持精确与 `*` 通配（path.Match 语义）；**规则命中覆盖 native**
+  （运营者显式指定优先），`key_label` 为自定义泳道标签。
+- 安全：key_label 疑似真实密钥（sk- 前缀/超长）时配置校验直接拒绝；
+  多Key渠道的 key 明细永不落盘。
+- 渠道名回查：`admin: true` 时经 channels list 建 id→name 映射；
+  查不到留空（诚实缺失）。
+
 ### 状态自动检查（collector 本地逻辑，非上游端点）
 - 快照存 `var/state/channel-watch/<site>.json`（原子写）；
   通知追加 `var/logs/channel-watch/<site>.jsonl`。

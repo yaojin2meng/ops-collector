@@ -40,22 +40,31 @@ const (
 
 // CallRecord 是一条脱敏后的调用日志。
 type CallRecord struct {
-	SchemaVersion   int            `json:"schema_version"`
-	SiteID          string         `json:"site_id"`
-	SiteKind        string         `json:"site_kind"`
-	RecordID        string         `json:"record_id"`
-	ObservedAt      int64          `json:"observed_at"` // unix 秒
-	Model           *string        `json:"model"`
-	Group           *string        `json:"group"`
-	Status          CallStatus     `json:"status"`
-	ErrorClass      *string        `json:"error_class"`
-	InputTokens     *int64         `json:"input_tokens"`
-	OutputTokens    *int64         `json:"output_tokens"`
-	CacheReadTokens *int64         `json:"cache_read_tokens"`
-	QuotaCost       *float64       `json:"quota_cost"`
-	DurationMs      *int64         `json:"duration_ms"`
-	FirstTokenMs    *int64         `json:"first_token_ms"`
-	Stream          *bool          `json:"stream"`
+	SchemaVersion   int        `json:"schema_version"`
+	SiteID          string     `json:"site_id"`
+	SiteKind        string     `json:"site_kind"`
+	RecordID        string     `json:"record_id"`
+	ObservedAt      int64      `json:"observed_at"` // unix 秒
+	Model           *string    `json:"model"`
+	Group           *string    `json:"group"`
+	Status          CallStatus `json:"status"`
+	ErrorClass      *string    `json:"error_class"`
+	InputTokens     *int64     `json:"input_tokens"`
+	OutputTokens    *int64     `json:"output_tokens"`
+	CacheReadTokens *int64     `json:"cache_read_tokens"`
+	QuotaCost       *float64   `json:"quota_cost"`
+	DurationMs      *int64     `json:"duration_ms"`
+	FirstTokenMs    *int64     `json:"first_token_ms"`
+	Stream          *bool      `json:"stream"`
+	// 上游渠道对齐（见 internal/align）：
+	//   ChannelID   上游渠道标识（new-api=渠道 id；sub2api=account_id），稳定 ID 而非网址
+	//   ChannelName 渠道名（admin 面可回查时填充）
+	//   ChannelKeyLabel 多Key渠道的 key 泳道标签（运营者自定义，绝非密钥本身）
+	//   ChannelSource 对齐来源：native=站点日志自带 / rule=配置映射
+	ChannelID       *string        `json:"channel_id,omitempty"`
+	ChannelName     *string        `json:"channel_name,omitempty"`
+	ChannelKeyLabel *string        `json:"channel_key_label,omitempty"`
+	ChannelSource   *string        `json:"channel_source,omitempty"`
 	Raw             map[string]any `json:"raw"`
 }
 

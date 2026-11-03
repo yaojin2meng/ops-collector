@@ -30,7 +30,8 @@ type Sub2ApiAdapter struct {
 
 var usageRawAllowlist = map[string]bool{
 	"id": true, "request_id": true, "model": true, "group_id": true,
-	"api_key_id": true, "input_tokens": true, "output_tokens": true,
+	"api_key_id": true, "account_id": true, "input_tokens": true,
+	"output_tokens":     true,
 	"cache_read_tokens": true, "cache_creation_tokens": true,
 	"total_cost": true, "actual_cost": true, "rate_multiplier": true,
 	"request_type": true, "stream": true, "duration_ms": true,
@@ -190,6 +191,12 @@ func (a *Sub2ApiAdapter) toCallRecord(it map[string]any) records.CallRecord {
 		g := strconv.FormatInt(gid, 10)
 		group = &g
 	}
+	// 原生上游归属：sub2api usage 的 account_id 即上游账号 id
+	var channelID *string
+	if acc, ok := httpc.AsInt(it["account_id"]); ok && acc > 0 {
+		s := strconv.FormatInt(acc, 10)
+		channelID = &s
+	}
 	return records.CallRecord{
 		SchemaVersion:   records.SchemaVersion,
 		SiteID:          a.site.SiteID,
@@ -206,6 +213,7 @@ func (a *Sub2ApiAdapter) toCallRecord(it map[string]any) records.CallRecord {
 		DurationMs:      intPtr("duration_ms"),
 		FirstTokenMs:    intPtr("first_token_ms"),
 		Stream:          boolPtr(it["stream"]),
+		ChannelID:       channelID,
 		Raw:             records.CleanRaw(it, usageRawAllowlist),
 	}
 }

@@ -27,6 +27,18 @@ type AuthConfig struct {
 	APIKeySecretRef string `json:"api_key_secret_ref,omitempty"`
 }
 
+// AlignmentRule 把模型 ID（精确或 glob）映射到指定上游渠道，
+// 用于自动对齐请求日志的上游归属。key_label 仅是运营者自定义的
+// key 泳道标签（多Key渠道区分用），绝不接受真实密钥。
+type AlignmentRule struct {
+	// Models 模型 ID 列表，支持 `*` 通配（如 "gpt-4o-*"、"claude-*"、"*"）
+	Models []string `json:"models"`
+	// ChannelID 上游渠道 ID（与 channels list / 站点日志中的渠道 ID 同键域）
+	ChannelID int64 `json:"channel_id"`
+	// KeyLabel 可选：key 泳道标签（禁止填真实密钥）
+	KeyLabel string `json:"key_label,omitempty"`
+}
+
 type SiteConfig struct {
 	SiteID  string     `json:"site_id"`
 	Name    string     `json:"name,omitempty"`
@@ -37,11 +49,12 @@ type SiteConfig struct {
 	Enabled *bool `json:"enabled,omitempty"`
 	// Admin 显式开启管理员面能力（渠道增删/状态管理）。
 	// 仅当运营者对该站点拥有管理员账号时才允许 true。
-	Admin        *bool    `json:"admin,omitempty"`
-	VerifyTLS    *bool    `json:"verify_tls,omitempty"`
-	TimeoutS     float64  `json:"timeout_s,omitempty"`
-	MinIntervalS *float64 `json:"min_interval_s,omitempty"`
-	Notes        string   `json:"notes,omitempty"`
+	Admin *bool `json:"admin,omitempty"`
+	// LogAlignment 可选：模型 ID → 上游渠道映射（日志对齐规则）
+	LogAlignment []AlignmentRule `json:"log_alignment,omitempty"`
+	TimeoutS     float64         `json:"timeout_s,omitempty"`
+	MinIntervalS *float64        `json:"min_interval_s,omitempty"`
+	Notes        string          `json:"notes,omitempty"`
 }
 
 func (s *SiteConfig) IsEnabled() bool {
@@ -50,10 +63,6 @@ func (s *SiteConfig) IsEnabled() bool {
 
 func (s *SiteConfig) AdminEnabled() bool {
 	return s.Admin != nil && *s.Admin
-}
-
-func (s *SiteConfig) TLSEnabled() bool {
-	return s.VerifyTLS == nil || *s.VerifyTLS
 }
 
 type DefaultsConfig struct {
@@ -158,8 +167,38 @@ func (c *Config) Validate() error {
 		default:
 			return ierr.Configf("站点 %s: auth.mode 必须是 password 或 api_key", s.SiteID)
 		}
+		for i, rule := range s.LogAlignment {
+			if len(rule.Models) == 0 {
+				return ierr.Configf("站点 %s: log_alignment[%d] 至少需要一个 models 条目", s.SiteID, i)
+			}
+			for _, m := range rule.Models {
+				if strings.TrimSpace(m) == "" {
+					return ierr.Configf("站点 %s: log_alignment[%d] models 含空条目", s.SiteID, i)
+				}
+			}
+			if rule.ChannelID <= 0 {
+				return ierr.Configf("站点 %s: log_alignment[%d] channel_id 必须为正整数（见 channels list）", s.SiteID, i)
+			}
+			if looksLikeKey(rule.KeyLabel) {
+				return ierr.Configf("站点 %s: log_alignment[%d] key_label 疑似真实密钥——"+
+					"凭据禁止写入配置；key_label 只能是自定义泳道标签（如 supplierA-main）", s.SiteID, i)
+			}
+		}
 	}
 	return nil
+}
+
+// looksLikeKey 识别疑似真实密钥的值（sk- 前缀或超长高熵串）。
+func looksLikeKey(v string) bool {
+	if v == "" {
+		return false
+	}
+	low := strings.ToLower(v)
+	if strings.HasPrefix(low, "sk-") || strings.HasPrefix(low, "sk_") ||
+		strings.HasPrefix(low, "skant-") {
+		return true
+	}
+	return len(v) > 64
 }
 
 func validateBaseURL(siteID, raw string) error {
